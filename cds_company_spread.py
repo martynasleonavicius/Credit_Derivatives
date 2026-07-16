@@ -107,7 +107,7 @@ def cds_spread(insurance_table, accrued_table, default_table):
         
 if __name__ == "__main__":
     
-    company_name = "Petroleos Mexicanos"   #Currently there are 2 different companies' bonds hardcoded for which CDS pricing is available here.
+    company_name = "Mars INC DEL"   #Currently there are 2 different companies' bonds hardcoded for which CDS pricing is available here.
                                     #They are Mars INC DEL and Petroleos Mexicanos. Market information last updated on 12/03/2026
     
     rates_fred = rates()
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     
     print(f"Spread is: {cds_spread(insurance_table, accrued_table, default_table)} basis points (bps)")
 
-#Seeing how git saves changes.
+
 
 
 
