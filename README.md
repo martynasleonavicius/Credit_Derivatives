@@ -16,7 +16,6 @@ Given a company's bond data, the project:
     - Accrued premium payments in the event of a mid-year default
 
 
-
 Two companies are currently supported: **Petroleos Mexicanos** and **Mars INC DEL**, with bond data last updated on 12/03/2026.
 
 ---
@@ -42,6 +41,7 @@ pip install numpy pandas scipy
 No API key is required - yield data is pulled directly from FRED's public CSV endpoint.
 
 ## Usage
+
 To price a CDS for one of the supported companies, open `cds_company_pricer.py` and set `company_name` at the top of the `__main__` block:
 
 ```python
@@ -63,6 +63,7 @@ python cds_simple_pricer.py
 ---
 
 ## Adding a new company
+
 To price a CDS for a different company, add its bond data to the `bonds` dictionary in `spread_calculator.py`:
 
 ```python
@@ -86,13 +87,14 @@ Coupons are assumed to be paid annually. Prices should be quoted per 100 face va
 - Treasury yields are used as the risk-free rate proxy
 - Yields beyond 30 years are capped at the 30-year rate; yields under 6 months use the 6-month rate
 
+
 ---
 
 ## Limitations
 
 ---
 
-- Bond data is hardcoded and time-sensitive - results are most meaningful when run close to the last trade date
+- Bond data is hardcoded and time-sensitive — results are most meaningful when run close to the last trade date
 - The FRED data only goes out to 30 years; longer-dated bonds will use the 30-year rate for all payments beyond that horizon
 - A single flat hazard rate is assumed across the life of the contract
 

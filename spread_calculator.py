@@ -9,6 +9,8 @@ import numpy as np
 from datetime import date
 import scipy.optimize
 
+from present_value import coupon_payment_discount
+
 
 # Structure of bonds dictionary: "COMPANY_NAME":[COUPON_RATE, MATURITY, LAST_PRICE, YIELD, LAST_TRADE_DATE]
 # Assume bonds have yearly coupons.
@@ -44,7 +46,7 @@ def number_of_payments(company_name) -> int:
     if fraction == 0:
         return years_left   # Only if coupon was paid today. Also, we ignore the existence of leap years (as per actual/365 convention)
     return years_left + 1   # Return one more than years left because a coupon payment is due in less than a year
-    
+
 
 # For more accuracy, we could interpolate the risk-free rates on the days when we expect the coupon payment based on the actual zero-yield curve
 def accurate_risk_free(rates_fred, company_name):
@@ -55,26 +57,13 @@ def accurate_risk_free(rates_fred, company_name):
     # Similarly, for any payments in more than 30 years, we will use 30 year rates
     for year in range(number_of_payments(company_name)):
         if next_payment <= 0.5:
-            accurate_rates[next_payment] = np.log(1 + rates_fred[0.5]/100)
+            accurate_rates[next_payment] = rates_fred[0.5]
         elif next_payment >= 30:
-            accurate_rates[next_payment] = np.log(1 + rates_fred[30]/100)
+            accurate_rates[next_payment] = rates_fred[30]
         else:
-            accurate_rates[next_payment] = interpolation(rates_fred, next_payment)
+            accurate_rates[next_payment] = coupon_payment_discount(rates_fred, next_payment)
         next_payment += 1
     return accurate_rates
-    
-
-
-# Function that linearly interpolates continuously compounding zero rates for coupon payments 
-def interpolation(rates_fred, next_payment):
-    years = np.array(list(rates_fred.keys()))
-    # We need to find years for which we know discount rates from FRED.
-    last_year = float(years[years <= next_payment][-1])    # Define this to be <= next_payment date
-    next_year = float(years[years >= next_payment][0])    # Define this to be >= next_payment date
-    b = (rates_fred[next_year] - rates_fred[last_year])/(next_year - last_year)     # Find the slope
-    a = rates_fred[last_year] - b*last_year    # Find the intercept
-    
-    return np.log(1 + (a + b*next_payment)/100)   # Return risk-free rate as a continuous compounding rate
 
 
 # Before we continue, we need to define present value calculation function for bond's present value

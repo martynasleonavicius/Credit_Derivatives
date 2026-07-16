@@ -7,6 +7,9 @@ A lot of this script is produced using Claude since this is my first time using 
 """
 
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 
 # Constant maturity treasury yields
@@ -20,17 +23,16 @@ def get_fred_series(ticker): #We get the constant-maturity yield curves from FRE
     return df
 
 
-def rates():
+
+def rates():    #Get the latest rate curve data
     rates_fred = {}
     for tick, mat in zip(tickers, maturities):
         series = get_fred_series(tick).replace('.', float('nan')).dropna()
-        rates_fred[mat] = float(series.iloc[-1].values[0])
+        rates_fred[mat] = np.log(1 + float(series.iloc[-1].values[0])/100)  #Convert to continously compounding rate
     return rates_fred
 
 
-
-
-
+plt.plot(rates().keys(), rates().values())
 
 
 
