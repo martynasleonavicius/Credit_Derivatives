@@ -14,7 +14,8 @@ The default probability calculations were based on techniques from chapter 22 .
 
 """
 from yield_curve_getter import rates
-from spread_calculator import spread, years_to_maturity, interpolation, number_of_payments, accurate_risk_free
+from spread_calculator import spread, years_to_maturity, number_of_payments, accurate_risk_free
+from present_value import coupon_payment_discount
 import pandas as pd
 import numpy as np
 
@@ -32,19 +33,21 @@ def discount_curve_on_default(rates_fred, company_name):
     years_left, fraction = years_to_maturity(company_name)
     next_default = fraction/2 if fraction > 0 else 1/2  # We define when the next default could be
     accurate_rates = {}     # Dictionary for interpolated zero rates
+    
     # NOTE: if there is less than 0.5 years left until the first possible default, we will use 0.5 zero rate for simplicity.
     # Similarly, for any payments in more than 30 years, we will use 30 year rates
     # This is just for the first default, which, as we have defined, can happen halfway between writing the contract and the first coupon payment
-    
-    accurate_rates[next_default] = np.log(1 + rates_fred[0.5]/100)
+    accurate_rates[next_default] = rates_fred[0.5]
+
     # After this we can go back to assuming that defaults may in the middle of the year, ie between payments
     next_default = 1.5
     
     for year in range(1, number_of_payments(company_name)): # We already accounted for the first one
         if next_default >= 30:
-            accurate_rates[next_default] = np.log(1 + rates_fred[30]/100)
+
+            accurate_rates[next_default] = rates_fred[30]
         else:
-            accurate_rates[next_default] = interpolation(rates_fred, next_default)
+            accurate_rates[next_default] = coupon_payment_discount(rates_fred, next_default)
                 
         next_default += 1
     return accurate_rates
